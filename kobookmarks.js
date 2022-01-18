@@ -1,13 +1,14 @@
 const fs = require("fs");
 const util = require("util");
-const bookmarks = require("./bookmark");
+// const bookmarks = require("./bookmark");
+const Database = require("better-sqlite3");
 
 const appendFile = util.promisify(fs.appendFile);
 
-const groupBooks = () => {
+const groupBooks = async (rows) => {
   const books = {};
 
-  bookmarks.map((d) => {
+  rows.map((d) => {
     if (d.VolumeID in books) {
       books[d.VolumeID].push({
         annotation: d.Annotation,
@@ -15,21 +16,36 @@ const groupBooks = () => {
       });
     } else {
       books[d.VolumeID] = [];
+      books[d.VolumeID].push({
+        annotation: d.Annotation,
+        text: d.Text,
+      });
     }
   });
   return books;
 };
 
-const createMd = (books) => {
-  for (const [k, v] of Object.entries(books)) {
-    v.map(async (t) => {
-      await appendFile(
-        `booknotes/${k.replace("file:///mnt/onboard/", "")}.txt`,
-        `- ${t.text}`
-      );
-    });
-  }
+const createMd = (bjson) => {
+  bjson.then((bookmark) => {
+    for (const [k, v] of Object.entries(bookmark)) {
+      v.map(async (t) => {
+        await appendFile(
+          `booknotes/${k.replace("file:///mnt/onboard/", "")}.txt`,
+          `- ${t.text} \r\n`
+        );
+      });
+    }
+  });
 };
 
-const booksJSON = groupBooks();
-createMd(booksJSON);
+const getBookmarksFromDB = () => {
+  const db = new Database("KoboReader_Jan172022.sqlite");
+  const row = db
+    .prepare("SELECT Text, Annotation,VolumeID FROM Bookmark")
+    .all();
+
+  const booksJSON = groupBooks(row);
+  createMd(booksJSON);
+};
+
+getBookmarksFromDB();

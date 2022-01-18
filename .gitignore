@@ -134,3 +134,4 @@ dist
 booknotes/*
 
 .DS_Store
+backups/*
