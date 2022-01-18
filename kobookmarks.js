@@ -1,9 +1,12 @@
 const fs = require("fs");
 const util = require("util");
-// const bookmarks = require("./bookmark");
+const del = require("del");
 const Database = require("better-sqlite3");
 
 const appendFile = util.promisify(fs.appendFile);
+const mkdirSync = util.promisify(fs.mkdirSync);
+
+const dbPath = process.argv[2];
 
 const groupBooks = async (rows) => {
   const books = {};
@@ -25,7 +28,10 @@ const groupBooks = async (rows) => {
   return books;
 };
 
-const createMd = (bjson) => {
+const createMd = async (bjson) => {
+  await del("booknotes");
+  mkdirSync("booknotes");
+
   bjson.then((bookmark) => {
     for (const [k, v] of Object.entries(bookmark)) {
       v.map(async (t) => {
@@ -39,7 +45,7 @@ const createMd = (bjson) => {
 };
 
 const getBookmarksFromDB = () => {
-  const db = new Database("KoboReader_Jan172022.sqlite");
+  const db = new Database(dbPath);
   const row = db
     .prepare("SELECT Text, Annotation,VolumeID FROM Bookmark")
     .all();
