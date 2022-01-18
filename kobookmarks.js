@@ -36,7 +36,7 @@ const createMd = async (bjson) => {
     for (const [k, v] of Object.entries(bookmark)) {
       v.map(async (t) => {
         await appendFile(
-          `booknotes/${k.replace("file:///mnt/onboard/", "")}.txt`,
+          `booknotes/${k.replace("file:///mnt/onboard/", "")}.md`,
           `- ${t.text} \r\n`
         );
       });
