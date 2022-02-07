@@ -1,3 +1,10 @@
-- Run `npm install`
+## Installation
 
-- To get all notes in markdown run `node kobookmarks.js <path to sqlite>`
+```bash
+npm install
+```
+## Run
+
+```bash
+node kobookmarks.js <path to sqlite>
+```
